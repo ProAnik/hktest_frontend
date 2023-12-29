@@ -17,10 +17,63 @@ import {
 } from '@mui/material';
 
 function App() {
+    const [sector, setSector] = useState()
+    const [selectedOptions, setSelectedOptions] = useState({});
+
+    const handleOptionChange = (level, value) => {
+        setSelectedOptions({
+            ...selectedOptions,
+            [level]: value,
+        });
+    };
+
+    const renderDropdown = (options, level) => {
+        const selectedValue = selectedOptions[level] || '';
+        const handleDropdownChange = (event) => {
+            const selectedValue = event.target.value;
+            handleOptionChange(level, selectedValue);
+        };
+
+        return (
+            <FormControl fullWidth variant="outlined" margin="normal" key={level}>
+                <InputLabel id={`selection-label-${level}`}>Select an Option</InputLabel>
+                <Select
+                    labelId={`selection-label-${level}`}
+                    id={`selection-${level}`}
+                    value={selectedValue}
+                    onChange={handleDropdownChange}
+                    label={`Select an Option ${level}`}
+                    required
+                >
+                    <MenuItem value="">
+                        <em>None</em>
+                    </MenuItem>
+                    {options?.map((option) => (
+                        <MenuItem key={option.id} value={option.name}>
+                            {option.name}
+                        </MenuItem>
+                    ))}
+                </Select>
+                {selectedValue && (
+                    <div>
+                        {options
+                            .filter((option) => option.name === selectedValue)
+                            .map((selectedOption) =>
+                                selectedOption.children && selectedOption.children.length > 0 ? (
+                                    renderDropdown(selectedOption.children, level + 1)
+                                ) : null
+                            )}
+                    </div>
+                )}
+            </FormControl>
+        );
+    };
+
     useEffect(() => {
         fetchData('/api/sectors/all')
             .then(response => {
                 console.log(response.data);
+                setSector(response.data)
             })
             .catch(error => {
                 console.error(error);
@@ -37,6 +90,7 @@ function App() {
         selection: false,
         agree: false,
     });
+
 
     const handleChange = (event) => {
         setFormData({...formData, [event.target.name]: event.target.value});
@@ -97,25 +151,8 @@ function App() {
                             margin="normal"
 
                         />
-                        <FormControl fullWidth variant="outlined" margin="normal" error={formErrors.selection}>
-                            <InputLabel id="selection-label">Select an Option</InputLabel>
-                            <Select
-                                labelId="selection-label"
-                                id="selection"
-                                name="selection"
-                                value={formData.selection}
-                                onChange={handleChange}
-                                label="Select an Option"
-                            >
-                                <MenuItem value="">
-                                    <em>None</em>
-                                </MenuItem>
-                                <MenuItem value="Option 1">Option 1</MenuItem>
-                                <MenuItem value="Option 2">Option 2</MenuItem>
-                                <MenuItem value="Option 3">Option 3</MenuItem>
-                            </Select>
-                            {formErrors.selection && <FormHelperText>Please select an option</FormHelperText>}
-                        </FormControl>
+                        {renderDropdown(sector, 1)}
+
                         <FormGroup>
                             <FormControlLabel
                                 control={
