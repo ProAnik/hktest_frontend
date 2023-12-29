@@ -1,6 +1,7 @@
 import "./App.css"
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Card} from "@mui/material";
+import { fetchData , postData} from "./axios/axiosHelper";
 import {
     TextField,
     FormControl,
@@ -16,6 +17,15 @@ import {
 } from '@mui/material';
 
 function App() {
+    useEffect(() => {
+        fetchData('/api/sectors/all')
+            .then(response => {
+                console.log(response.data);
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }, []);
     const [formData, setFormData] = useState({
         name: '',
         selection: '',
