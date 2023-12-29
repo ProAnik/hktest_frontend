@@ -137,7 +137,7 @@ function App() {
                 alignItems: 'center',
                 minHeight: '100vh', // Optional: set a minimum height for the container
             }}>
-                <Card sx={{padding: '20px', minWidth: "300px"}}>
+                <Card className={"w-full"} sx={{padding: '20px', minWidth: "300px", width: "100%"}}>
                     <form onSubmit={handleSubmit}>
                         <TextField
                             label="Name"
