@@ -53,10 +53,14 @@ function SectorForm() {
     }, []);
 
     const handleOptionChange = (level, value) => {
-        setSelectedOptions({
-            ...selectedOptions,
-            [level]: value,
-        });
+        const updatedOptions = { ...selectedOptions, [level]: value };
+
+        // Reset subsequent dropdowns starting from the next level
+        for (let i = level + 1; i <= 3; i++) {
+            updatedOptions[i] = null;
+        }
+
+        setSelectedOptions(updatedOptions);
     };
 
     const renderDropdown = (options, level) => {
