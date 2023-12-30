@@ -68,13 +68,13 @@ function SectorForm() {
 
         return (
             <FormControl fullWidth variant="outlined" margin="normal" key={level}>
-                <InputLabel id={`selection-label-${level}`}>Select an Option</InputLabel>
+                <InputLabel id={`selection-label-${level}`}>Select a Sector</InputLabel>
                 <Select
                     labelId={`selection-label-${level}`}
                     id={`selection-${level}`}
                     value={selectedValue}
                     onChange={handleDropdownChange}
-                    label={`Select an Option ${level}`}
+                    label={`Select a Sector ${level}`}
                     required
                 >
                     <MenuItem value="">
