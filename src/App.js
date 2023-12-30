@@ -1,9 +1,12 @@
 import "./App.css"
-import SectorForm from "./components/SectorForm";
+import Layout from "./Layout";
+import {DataProvider} from "./contexts/DataContext";
 
 function App() {
     return <>
-        <SectorForm/>
+        <DataProvider>
+            <Layout></Layout>
+        </DataProvider>
     </>
 }
 

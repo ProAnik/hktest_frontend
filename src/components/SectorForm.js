@@ -11,11 +11,40 @@ import {
     Select,
     TextField
 } from "@mui/material";
-import {fetchData, postData} from "../axios/axiosHelper";
+import Typography from '@mui/material/Typography';
 
-function SectorForm () {
+import {fetchData, postData} from "../axios/axiosHelper";
+import {useData} from "../contexts/DataContext";
+
+function SectorForm() {
+    const { updateData, triggerApiCall } = useData();
+
     const [sector, setSector] = useState()
     const [selectedOptions, setSelectedOptions] = useState({});
+
+    const [formData, setFormData] = useState({
+        name: '',
+        selection: '',
+        agree: false,
+    });
+
+    const [formErrors, setFormErrors] = useState({
+        id: null,
+        name: false,
+        selection: false,
+        agree: false,
+    });
+
+    useEffect(() => {
+        fetchData('/api/sectors/all')
+            .then(response => {
+                console.log(response.data);
+                setSector(response.data)
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }, []);
 
     const handleOptionChange = (level, value) => {
         setSelectedOptions({
@@ -66,28 +95,8 @@ function SectorForm () {
         );
     };
 
-    useEffect(() => {
-        fetchData('/api/sectors/all')
-            .then(response => {
-                console.log(response.data);
-                setSector(response.data)
-            })
-            .catch(error => {
-                console.error(error);
-            });
-    }, []);
-    const [formData, setFormData] = useState({
-        name: '',
-        selection: '',
-        agree: false,
-    });
 
-    const [formErrors, setFormErrors] = useState({
-        id: null,
-        name: false,
-        selection: false,
-        agree: false,
-    });
+
 
 
     const handleChange = (event) => {
@@ -121,14 +130,29 @@ function SectorForm () {
 
         if (!errors) {
             // Form submission logic can go here
-            if(!formData.id) {
+            if (!formData.id) {
                 postData('/api/record/add', formData).then(res => {
-                    setFormData({name: res.data.name, selection: res.data.selection, agree: res.data.agree, id: res.data.id});
+                    setFormData({
+                        name: res.data.name,
+                        selection: res.data.selection,
+                        agree: res.data.agree,
+                        id: res.data.id
+                    });
+                    updateData(res.data.id)
+                    triggerApiCall()
                     alert('Added Successfully!')
                 });
             } else {
                 postData('/api/record/update', formData).then(res => {
-                    setFormData({name: res.data.name, selection: res.data.selection, agree: res.data.agree, id: res.data.id});
+                    setFormData({
+                        name: res.data.name,
+                        selection: res.data.selection,
+                        agree: res.data.agree,
+                        id: res.data.id
+                    });
+                    updateData(res.data.id)
+                    triggerApiCall()
+
                     alert('Updated Successfully!')
                 });
             }
@@ -142,53 +166,48 @@ function SectorForm () {
     };
 
     return (
-        <div className={"main-bg"}>
-            <Container maxWidth="sm" sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '100vh', // Optional: set a minimum height for the container
-            }}>
-                <Card className={"w-full"} sx={{padding: '20px', minWidth: "300px", width: "100%"}}>
-                    <form onSubmit={handleSubmit}>
-                        <TextField
-                            label="Name"
-                            variant="outlined"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            error={formErrors.name}
-                            helperText={formErrors.name ? 'Name is required' : ''}
-                            fullWidth
-                            margin="normal"
+        <Card sx={{padding: '20px', minWidth: "300px", width: "100%"}}>
+            <Typography variant="h5" component="div">
+                { formData.id ? "Edit" : "Add"} Profile
+            </Typography>
+            <form onSubmit={handleSubmit}>
+                <TextField
+                    label="Name"
+                    variant="outlined"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    error={formErrors.name}
+                    helperText={formErrors.name ? 'Name is required' : ''}
+                    fullWidth
+                    margin="normal"
 
-                        />
-                        {renderDropdown(sector, 1)}
+                />
+                {renderDropdown(sector, 1)}
 
-                        <FormGroup>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        checked={formData.agree}
-                                        onChange={handleAgreeChange}
-                                        name="agree"
-                                        color="primary"
+                <FormGroup>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={formData.agree}
+                                onChange={handleAgreeChange}
+                                name="agree"
+                                color="primary"
 
-                                    />
-                                }
-                                label="Agree to terms"
                             />
-                            {formErrors.agree && (
-                                <FormHelperText error>Please agree to the terms</FormHelperText>
-                            )}
-                        </FormGroup>
-                        <Button type="submit" variant="contained" color="primary">
-                            Submit
-                        </Button>
-                    </form>
-                </Card>
-            </Container>
-        </div>
+                        }
+                        label="Agree to terms"
+                    />
+                    {formErrors.agree && (
+                        <FormHelperText error>Please agree to the terms</FormHelperText>
+                    )}
+                </FormGroup>
+                <Button type="submit" variant="contained" color="primary">
+                    Submit
+                </Button>
+            </form>
+        </Card>
     );
 }
+
 export default SectorForm;
