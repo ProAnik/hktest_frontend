@@ -9,7 +9,9 @@ import {
     InputLabel,
     MenuItem,
     Select,
-    TextField
+    TextField,
+    Snackbar,
+    Alert
 } from "@mui/material";
 import Typography from '@mui/material/Typography';
 
@@ -17,7 +19,7 @@ import {fetchData, postData} from "../axios/axiosHelper";
 import {useData} from "../contexts/DataContext";
 
 function SectorForm() {
-    const { updateData, triggerApiCall } = useData();
+    const {updateData, triggerApiCall} = useData();
 
     const [sector, setSector] = useState()
     const [selectedOptions, setSelectedOptions] = useState({});
@@ -34,6 +36,10 @@ function SectorForm() {
         selection: false,
         agree: false,
     });
+
+    const [apiSuccess, setApiSuccess] = useState(false);
+    const [apiMessage, setApiMessage] = useState('');
+
 
     useEffect(() => {
         fetchData('/api/sectors/all')
@@ -96,9 +102,6 @@ function SectorForm() {
     };
 
 
-
-
-
     const handleChange = (event) => {
         setFormData({...formData, [event.target.name]: event.target.value});
         setFormErrors({...formErrors, [event.target.name]: false});
@@ -140,7 +143,9 @@ function SectorForm() {
                     });
                     updateData(res.data.id)
                     triggerApiCall()
-                    alert('Added Successfully!')
+                    setApiMessage("Added Successfully!");
+                    // Set API success state to display Snackbar
+                    setApiSuccess(true);
                 });
             } else {
                 postData('/api/record/update', formData).then(res => {
@@ -153,7 +158,9 @@ function SectorForm() {
                     updateData(res.data.id)
                     triggerApiCall()
 
-                    alert('Updated Successfully!')
+                    setApiMessage("Updated Successfully!");
+                    // Set API success state to display Snackbar
+                    setApiSuccess(true);
                 });
             }
 
@@ -165,48 +172,60 @@ function SectorForm() {
 
     };
 
+    const handleCloseSnackbar = () => {
+        setApiSuccess(false);
+    };
+
     return (
-        <Card sx={{padding: '20px', minWidth: "300px", width: "100%"}}>
-            <Typography variant="h5" component="div">
-                { formData.id ? "Edit" : "Add"} Profile
-            </Typography>
-            <form onSubmit={handleSubmit}>
-                <TextField
-                    label="Name"
-                    variant="outlined"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    error={formErrors.name}
-                    helperText={formErrors.name ? 'Name is required' : ''}
-                    fullWidth
-                    margin="normal"
+        <div>
+            <Snackbar open={apiSuccess} autoHideDuration={6000}  onClose={handleCloseSnackbar}>
+                <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+                    {apiMessage}
+                </Alert>
+            </Snackbar>
+            <Card sx={{padding: '20px', minWidth: "300px", width: "100%"}}>
+                <Typography variant="h5" component="div">
+                    {formData.id ? "Edit" : "Add"} Profile
+                </Typography>
+                <form onSubmit={handleSubmit}>
+                    <TextField
+                        label="Name"
+                        variant="outlined"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        error={formErrors.name}
+                        helperText={formErrors.name ? 'Name is required' : ''}
+                        fullWidth
+                        margin="normal"
 
-                />
-                {renderDropdown(sector, 1)}
-
-                <FormGroup>
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={formData.agree}
-                                onChange={handleAgreeChange}
-                                name="agree"
-                                color="primary"
-
-                            />
-                        }
-                        label="Agree to terms"
                     />
-                    {formErrors.agree && (
-                        <FormHelperText error>Please agree to the terms</FormHelperText>
-                    )}
-                </FormGroup>
-                <Button type="submit" variant="contained" color="primary">
-                    Submit
-                </Button>
-            </form>
-        </Card>
+                    {renderDropdown(sector, 1)}
+
+                    <FormGroup>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={formData.agree}
+                                    onChange={handleAgreeChange}
+                                    name="agree"
+                                    color="primary"
+
+                                />
+                            }
+                            label="Agree to terms"
+                        />
+                        {formErrors.agree && (
+                            <FormHelperText error>Please agree to the terms</FormHelperText>
+                        )}
+                    </FormGroup>
+                    <Button type="submit" variant="contained" color="primary">
+                        Submit
+                    </Button>
+                </form>
+            </Card>
+        </div>
+
     );
 }
 
